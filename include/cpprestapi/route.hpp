@@ -11,6 +11,7 @@ namespace web
     {
         struct route_base
         {
+            virtual std::size_t params_size() = 0;
             virtual void execute(web::http::http_request message, std::vector<utility::string_t>&& params) = 0;
         };
 
@@ -38,9 +39,11 @@ namespace web
         public:
             route(const utility::string_t& path, handler_type&& handler) : path(path), handler(std::move(handler)) {}
 
+            std::size_t params_size() override { return sizeof...(Args); }
+
             void execute(web::http::http_request message, std::vector<utility::string_t>&& params) override
             {
-
+                // TODO
             }
 
             void execute(web::http::http_request message, Args&&... args) { handler(std::move(message), std::forward<Args>(args)...) }

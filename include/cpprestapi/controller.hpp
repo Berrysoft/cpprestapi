@@ -41,7 +41,7 @@ namespace web
             }
 
         public:
-            void handle(const utility::string_t& path);
+            void handle(const utility::string_t& path, web::http::http_request message);
         };
     } // namespace api
 } // namespace web

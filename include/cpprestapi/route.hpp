@@ -11,8 +11,8 @@ namespace web
     {
         struct route_base
         {
-            virtual std::size_t params_size() = 0;
-            virtual void execute(web::http::http_request message, std::vector<utility::string_t>&& params) = 0;
+            virtual std::size_t params_size() const noexcept = 0;
+            virtual void execute(web::http::http_request message, std::vector<utility::string_t>&& params) const = 0;
         };
 
         namespace details
@@ -33,20 +33,19 @@ namespace web
         private:
             using handler_type = std::function<void(web::http::http_request, Args...)>;
 
-            utility::string_t path;
             handler_type handler;
 
         public:
-            route(const utility::string_t& path, handler_type&& handler) : path(path), handler(std::move(handler)) {}
+            route(handler_type&& handler) : handler(std::move(handler)) {}
 
-            std::size_t params_size() override { return sizeof...(Args); }
+            std::size_t params_size() const noexcept override { return sizeof...(Args); }
 
-            void execute(web::http::http_request message, std::vector<utility::string_t>&& params) override
+            void execute(web::http::http_request message, std::vector<utility::string_t>&& params) const override
             {
                 // TODO
             }
 
-            void execute(web::http::http_request message, Args&&... args) { handler(std::move(message), std::forward<Args>(args)...) }
+            void execute(web::http::http_request message, Args&&... args) const { handler(std::move(message), std::forward<Args>(args)...) }
         };
     } // namespace api
 } // namespace web

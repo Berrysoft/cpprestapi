@@ -10,19 +10,16 @@ namespace web
     {
         void app::global_handler(http_request message)
         {
-            string_t path = message.relative_uri().to_string();
+            route_path path = message.relative_uri().to_string();
             for (auto& pair : routes)
             {
-                size_t i;
-                for (i = 0; i < pair.first.length() && i < path.length(); i++)
+                if (pair.first.size() <= path.size())
                 {
-                    if (pair.first[i] != path[i]) break;
-                }
-                if (i >= pair.first.length())
-                {
-                    string_t subpath = path.substr(i);
-                    pair.second->handle(subpath, move(message));
-                    break;
+                    if (equal(pair.first.begin(), pair.first.end(), path.begin(), path.begin() + pair.first.size()))
+                    {
+                        pair.second->handle(path.sub_path(pair.first.size()), move(message));
+                        break;
+                    }
                 }
             }
         }

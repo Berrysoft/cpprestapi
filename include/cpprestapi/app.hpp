@@ -3,8 +3,9 @@
 
 #include <cpprest/http_listener.h>
 #include <cpprestapi/controller.hpp>
+#include <cpprestapi/route_path.hpp>
 #include <cpprestapi/utility.hpp>
-#include <map>
+#include <unordered_map>
 #include <memory>
 
 namespace web
@@ -22,7 +23,7 @@ namespace web
             using controller_ptr = std::unique_ptr<controller_base>;
 
             listener::http_listener listener;
-            std::map<utility::string_t, controller_ptr> routes;
+            std::unordered_map<route_path, controller_ptr> routes;
 
         protected:
             void support_global() { listener.support(std::bind(std::mem_fn(&app::global_handler), this, std::placeholders::_1)); }
@@ -38,7 +39,7 @@ namespace web
             {
                 support(path, std::make_unique<C>(std::forward<Args>(args)...));
             }
-            void support(const utility::string_t& path, controller_ptr&& controller) { routes.emplace(path, std::move(controller)); }
+            void support(route_path&& path, controller_ptr&& controller) { routes.emplace(path, std::move(controller)); }
 
             pplx::task<void> open() { return listener.open(); }
             pplx::task<void> close() { return listener.close(); }

@@ -8,11 +8,12 @@ using namespace std;
 
 namespace web::api
 {
-    void controller_base::handle(const route_path& path, http_request message) const
+    bool controller_base::handle(const route_path& path, http_request message) const
     {
         for (auto& pair : routes)
         {
-            if (pair.first.size() <= path.size())
+            const optional<method>& acc_mtd = pair.second->accept_method();
+            if ((!acc_mtd || *acc_mtd == message.method()) && pair.first.size() <= path.size())
             {
                 vector<string_t> params(pair.second->params_size());
                 auto lit = pair.first.begin(), rit = path.begin();
@@ -32,9 +33,10 @@ namespace web::api
                     goto contouter;
                 }
                 pair.second->execute(move(message), move(params));
-                break;
+                return true;
             }
         contouter:;
         }
+        return false;
     }
 } // namespace web::api

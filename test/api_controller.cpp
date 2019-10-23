@@ -7,9 +7,9 @@ using namespace utility;
 
 api_controller::api_controller()
 {
-    this->support(U("/hello"), &api_controller::get_hello, this);
-    this->support(U("/hello/{0}"), &api_controller::get_hello_name, this);
-    this->support(U("/hello/{0}/{1}"), &api_controller::get_hello_name_times, this);
+    this->support(methods::GET, U("/hello"), &api_controller::get_hello, this);
+    this->support(methods::GET, U("/hello/{0}"), &api_controller::get_hello_name, this);
+    this->support(methods::GET, U("/hello/{0}/{1}"), &api_controller::get_hello_name_times, this);
 }
 
 void api_controller::get_hello_name_times(http_request message, string_t name, size_t times)

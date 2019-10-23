@@ -15,10 +15,16 @@ namespace web::api
             {
                 if (equal(pair.first.begin(), pair.first.end(), path.begin(), path.begin() + pair.first.size()))
                 {
-                    pair.second->handle(path.sub_path(pair.first.size()), move(message));
-                    break;
+                    if (pair.second->handle(path.sub_path(pair.first.size()), move(message)))
+                        return;
                 }
             }
         }
+        global_not_found(move(message));
+    }
+
+    void app::global_not_found(http_request message)
+    {
+        message.reply(status_codes::NotFound);
     }
 } // namespace web::api

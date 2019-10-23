@@ -42,8 +42,19 @@ namespace web::api
             routes.emplace(path, std::move(route));
         }
 
+        template <typename... Args>
+        void support(const web::http::method& mtd, const utility::string_t& path, std::function<void(web::http::http_request, Args...)>&& handler)
+        {
+            support(path, std::make_unique<route<Args...>>(mtd, std::move(handler)));
+        }
+        template <typename T, typename... Args>
+        void support(const web::http::method& mtd, const utility::string_t& path, void (T::*f)(web::http::http_request, Args...), T* t)
+        {
+            support(mtd, path, details::mem_fn_bind(f, t));
+        }
+
     public:
-        CPPRESTAPI_API void handle(const route_path& path, web::http::http_request message) const;
+        CPPRESTAPI_API bool handle(const route_path& path, web::http::http_request message) const;
     };
 } // namespace web::api
 

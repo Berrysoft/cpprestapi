@@ -26,6 +26,7 @@ namespace web::api
     protected:
         void support_global() { listener.support(details::mem_fn_bind(&app::global_handler, this)); }
         CPPRESTAPI_API void global_handler(web::http::http_request message);
+        CPPRESTAPI_API void global_not_found(web::http::http_request message);
 
     public:
         app() : listener() { support_global(); }

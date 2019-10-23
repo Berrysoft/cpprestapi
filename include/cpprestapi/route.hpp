@@ -3,13 +3,26 @@
 
 #include <cpprest/http_msg.h>
 #include <functional>
+#include <optional>
 #include <vector>
 
 namespace web::api
 {
-    struct route_base
+    class route_base
     {
+    private:
+        std::optional<web::http::method> mtd;
+
+    protected:
+        route_base() : mtd(std::nullopt) {}
+        route_base(const web::http::method& mtd) : mtd(mtd) {}
+
+    public:
+        virtual ~route_base() {}
+
+    public:
         virtual std::size_t params_size() const noexcept = 0;
+        const std::optional<web::http::method>& accept_method() const noexcept { return mtd; }
         virtual void execute(web::http::http_request message, std::vector<utility::string_t>&& params) const = 0;
     };
 
@@ -40,7 +53,9 @@ namespace web::api
         handler_type handler;
 
     public:
-        route(handler_type&& handler) : handler(std::move(handler)) {}
+        route(handler_type&& handler) : route_base(), handler(std::move(handler)) {}
+        route(const web::http::method& mtd, handler_type&& handler) : route_base(mtd), handler(std::move(handler)) {}
+        ~route() override {}
 
         std::size_t params_size() const noexcept override { return sizeof...(Args); }
 

@@ -51,12 +51,14 @@ namespace web
                 execute(std::move(message), std::move(params), std::make_index_sequence<sizeof...(Args)>{});
             }
 
+        private:
             template <std::size_t... Indicies>
             void execute(web::http::http_request message, std::vector<utility::string_t>&& params, std::index_sequence<Indicies...>) const
             {
                 execute(std::move(message), details::get_param<Args>(params[Indicies])...);
             }
 
+        public:
             void execute(web::http::http_request message, Args&&... args) const
             {
                 handler(std::move(message), std::forward<Args>(args)...);

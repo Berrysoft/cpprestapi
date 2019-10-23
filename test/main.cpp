@@ -2,7 +2,7 @@
 #include <cpprestapi/app.hpp>
 #include <iostream>
 
-#ifdef _WIN32
+#ifdef WIN32
 #include <Windows.h>
 #else
 #include <csignal>
@@ -14,7 +14,7 @@ using namespace std;
 
 volatile bool global_exit = false;
 
-#ifdef _WIN32
+#ifdef WIN32
 BOOL WINAPI int_handler(DWORD dwCtrlType)
 {
     return global_exit = (dwCtrlType == CTRL_C_EVENT);
@@ -28,7 +28,7 @@ void int_handler(int sig)
 
 int main()
 {
-#ifdef _WIN32
+#ifdef WIN32
     SetConsoleCtrlHandler(int_handler, TRUE);
 #else
     signal(SIGINT, int_handler);

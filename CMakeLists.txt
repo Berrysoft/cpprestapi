@@ -15,7 +15,7 @@ file(GLOB LIB_HEADERS "include/cpprestapi/*.hpp")
 file(GLOB LIB_SOURCE "src/cpprestapi/*.cpp")
 add_library(cpprestapi ${LIB_SOURCE})
 
-target_link_libraries(cpprestapi cpprestsdk::cpprest cpprestsdk::cpprestsdk_zlib_internal cpprestsdk::cpprestsdk_boost_internal cpprestsdk::cpprestsdk_brotli_internal)
+target_link_libraries(cpprestapi cpprestsdk::cpprest)
 
 install(FILES ${LIB_HEADERS} DESTINATION include/cpprestapi)
 install(TARGETS cpprestapi LIBRARY DESTINATION lib)

@@ -18,12 +18,18 @@ namespace web
         namespace details
         {
             template <typename T>
-            T get_param(const utility::string_t& param)
+            inline T get_param(const utility::string_t& param)
             {
                 utility::istringstream_t stream{ param };
                 T result;
-                stream << result;
+                stream >> result;
                 return result;
+            }
+
+            template <>
+            inline utility::string_t get_param<utility::string_t>(const utility::string_t& param)
+            {
+                return std::move(param);
             }
         } // namespace details
 
@@ -42,10 +48,19 @@ namespace web
 
             void execute(web::http::http_request message, std::vector<utility::string_t>&& params) const override
             {
-                // TODO
+                execute(std::move(message), std::move(params), std::make_index_sequence<sizeof...(Args)>{});
             }
 
-            void execute(web::http::http_request message, Args&&... args) const { handler(std::move(message), std::forward<Args>(args)...) }
+            template <std::size_t... Indicies>
+            void execute(web::http::http_request message, std::vector<utility::string_t>&& params, std::index_sequence<Indicies...>) const
+            {
+                execute(std::move(message), details::get_param<Args>(params[Indicies])...);
+            }
+
+            void execute(web::http::http_request message, Args&&... args) const
+            {
+                handler(std::move(message), std::forward<Args>(args)...);
+            }
         };
     } // namespace api
 } // namespace web

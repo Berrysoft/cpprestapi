@@ -19,7 +19,7 @@ api_controller::api_controller()
 
 void api_controller::get_hello_name(web::http::http_request message, utility::string_t name)
 {
-    utf8ostringstream stream;
-    stream << "Hello, " << name.c_str() << '!';
+    ostringstream_t stream;
+    stream << U("Hello, ") << name << U('!');
     message.reply(status_codes::OK, stream.str());
 }

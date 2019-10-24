@@ -55,6 +55,8 @@ namespace web::api
 
     public:
         CPPRESTAPI_API bool handle(const route_path& path, web::http::http_request message) const;
+
+        virtual ~controller_base() {}
     };
 } // namespace web::api
 

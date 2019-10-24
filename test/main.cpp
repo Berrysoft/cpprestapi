@@ -1,6 +1,8 @@
 #include "api_controller.hpp"
+#include <condition_variable>
 #include <cpprestapi/app.hpp>
 #include <iostream>
+#include <mutex>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -12,17 +14,23 @@ using namespace web;
 using namespace web::api;
 using namespace std;
 
-volatile bool global_exit = false;
+mutex mtx;
+condition_variable cond;
 
 #ifdef WIN32
 BOOL WINAPI int_handler(DWORD dwCtrlType)
 {
-    return global_exit = (dwCtrlType == CTRL_C_EVENT);
+    if (dwCtrlType == CTRL_C_EVENT)
+    {
+        cond.notify_all();
+        return TRUE;
+    }
+    return FALSE;
 }
 #else
 void int_handler(int sig)
 {
-    global_exit = true;
+    cond.notify_all();
 }
 #endif
 
@@ -41,8 +49,10 @@ int main()
     cout << "Server started." << endl;
     cout << "Press Ctrl+C to exit." << endl;
 
-    while (!global_exit)
-        ;
+    {
+        unique_lock lock{ mtx };
+        cond.wait(lock);
+    }
 
     a.close().wait();
     cout << "Server exited." << endl;

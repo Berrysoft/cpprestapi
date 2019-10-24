@@ -13,3 +13,6 @@ CTestTestfile.cmake
 out/
 .vs/
 CMakeSettings.json
+
+# VSCode
+.vscode/

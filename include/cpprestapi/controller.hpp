@@ -27,13 +27,13 @@ namespace web::api
         std::unordered_map<route_path, route_ptr> routes;
 
     protected:
-        template <typename... Args>
-        void support(const utility::string_t& path, std::function<void(web::http::http_request, Args...)>&& handler)
+        template <typename Result, typename... Args>
+        void support(const utility::string_t& path, std::function<Result(web::http::http_request, Args...)>&& handler)
         {
-            support(path, std::make_unique<route<Args...>>(std::move(handler)));
+            support(path, std::make_unique<route<Result, Args...>>(std::move(handler)));
         }
-        template <typename T, typename... Args>
-        void support(const utility::string_t& path, void (T::*f)(web::http::http_request, Args...), T* t)
+        template <typename T, typename Result, typename... Args>
+        void support(const utility::string_t& path, Result (T::*f)(web::http::http_request, Args...), T* t)
         {
             support(path, details::mem_fn_bind(f, t));
         }
@@ -42,13 +42,13 @@ namespace web::api
             routes.emplace(path, std::move(route));
         }
 
-        template <typename... Args>
-        void support(const web::http::method& mtd, const utility::string_t& path, std::function<void(web::http::http_request, Args...)>&& handler)
+        template <typename Result, typename... Args>
+        void support(const web::http::method& mtd, const utility::string_t& path, std::function<Result(web::http::http_request, Args...)>&& handler)
         {
-            support(path, std::make_unique<route<Args...>>(mtd, std::move(handler)));
+            support(path, std::make_unique<route<Result, Args...>>(mtd, std::move(handler)));
         }
-        template <typename T, typename... Args>
-        void support(const web::http::method& mtd, const utility::string_t& path, void (T::*f)(web::http::http_request, Args...), T* t)
+        template <typename T, typename Result, typename... Args>
+        void support(const web::http::method& mtd, const utility::string_t& path, Result (T::*f)(web::http::http_request, Args...), T* t)
         {
             support(mtd, path, details::mem_fn_bind(f, t));
         }

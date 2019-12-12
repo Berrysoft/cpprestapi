@@ -4,6 +4,7 @@
 using namespace std;
 using namespace web::http;
 using namespace utility;
+using namespace pplx;
 
 api_controller::api_controller()
 {
@@ -12,7 +13,7 @@ api_controller::api_controller()
     this->support(methods::GET, U("/hello/{0}/{1}"), &api_controller::get_hello_name_times, this);
 }
 
-void api_controller::get_hello_name_times(http_request message, string_t name, size_t times)
+task<void> api_controller::get_hello_name_times(http_request message, string_t name, size_t times)
 {
     ostringstream_t stream;
     stream << U("Hello, ") << name;
@@ -21,5 +22,5 @@ void api_controller::get_hello_name_times(http_request message, string_t name, s
         stream << U(", ") << times << U(" times");
     }
     stream << U('!');
-    message.reply(status_codes::OK, stream.str());
+    return message.reply(status_codes::OK, stream.str());
 }

@@ -44,11 +44,11 @@ namespace web::api
         }
     } // namespace details
 
-    template <typename... Args>
+    template <typename Result, typename... Args>
     class route : public route_base
     {
     private:
-        using handler_type = std::function<void(web::http::http_request, Args...)>;
+        using handler_type = std::function<Result(web::http::http_request, Args...)>;
 
         handler_type handler;
 
@@ -61,7 +61,7 @@ namespace web::api
 
         void execute(web::http::http_request message, std::vector<utility::string_t>&& params) const override
         {
-            execute(std::move(message), std::move(params), std::make_index_sequence<sizeof...(Args)>{});
+            execute(std::move(message), std::move(params), std::index_sequence_for<Args...>{});
         }
 
     private:
@@ -75,6 +75,40 @@ namespace web::api
         void execute(web::http::http_request message, Args&&... args) const
         {
             handler(std::move(message), std::forward<Args>(args)...);
+        }
+    };
+
+    template <typename Result, typename... Args>
+    class route<pplx::task<Result>, Args...> : public route_base
+    {
+    private:
+        using handler_type = std::function<pplx::task<Result>(web::http::http_request, Args...)>;
+
+        handler_type handler;
+
+    public:
+        route(handler_type&& handler) : route_base(), handler(std::move(handler)) {}
+        route(const web::http::method& mtd, handler_type&& handler) : route_base(mtd), handler(std::move(handler)) {}
+        ~route() override {}
+
+        std::size_t params_size() const noexcept override { return sizeof...(Args); }
+
+        void execute(web::http::http_request message, std::vector<utility::string_t>&& params) const override
+        {
+            execute(std::move(message), std::move(params), std::index_sequence_for<Args...>{});
+        }
+
+    private:
+        template <std::size_t... Indicies>
+        void execute(web::http::http_request message, std::vector<utility::string_t>&& params, std::index_sequence<Indicies...>) const
+        {
+            execute(std::move(message), details::get_param<Args>(params[Indicies])...);
+        }
+
+    public:
+        void execute(web::http::http_request message, Args&&... args) const
+        {
+            handler(std::move(message), std::forward<Args>(args)...).wait();
         }
     };
 } // namespace web::api
